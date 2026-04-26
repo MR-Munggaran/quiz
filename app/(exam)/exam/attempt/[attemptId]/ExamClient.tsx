@@ -33,18 +33,19 @@ export default function ExamClient({ data, testAttemptId }: Props) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // ✅ ambil state langsung (NO FUNCTION)
   const setSubtests = useExamStore((s) => s.setSubtests)
   const goToSubtest = useExamStore((s) => s.goToSubtest)
-  const getCurrentSubtest = useExamStore((s) => s.getCurrentSubtest)
   const setOnTimeUp = useExamStore((s) => s.setOnTimeUp)
   const currentSubtestIndex = useExamStore((s) => s.currentSubtestIndex)
   const currentIndex = useExamStore((s) => s.currentQuestionIndex)
   const setCurrentQuestion = useExamStore((s) => s.setCurrentQuestion)
   const setTime = useExamStore((s) => s.setTime)
+  const subtests = useExamStore((s) => s.subtests)
 
-  // Inisialisasi subtests dari data server
+  // ================= INIT =================
   useEffect(() => {
-    const subtests: SubtestInfo[] = data.map((sa) => ({
+    const mapped: SubtestInfo[] = data.map((sa) => ({
       subtestAttemptId: sa.id,
       subtestId: sa.subtest.id,
       title: sa.subtest.title,
@@ -55,56 +56,55 @@ export default function ExamClient({ data, testAttemptId }: Props) {
       questions: sa.subtest.questions,
     }))
 
-    setSubtests(subtests)
+    setSubtests(mapped)
 
-    // Set timer untuk subtest pertama
-    if (subtests.length > 0) {
-      setTime(subtests[0].durationSeconds)
+    if (mapped.length > 0) {
+      setTime(mapped[0].durationSeconds)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [data, setSubtests, setTime])
 
-  // Fungsi submit subtest saat ini
+  // ================= CURRENT STATE =================
+  const currentSubtest = subtests[currentSubtestIndex] ?? null
+  const subtestAttemptId = currentSubtest?.subtestAttemptId ?? ''
+  const questions = currentSubtest?.questions ?? []
+  const currentQuestion = questions[currentIndex]
+
+  // ================= SUBMIT =================
   const submitCurrentSubtest = useCallback(async () => {
-    if (isSubmitting) return
-    const current = getCurrentSubtest()
-    if (!current) return
+    if (isSubmitting || !currentSubtest) return
 
     setIsSubmitting(true)
+
     try {
       await fetch('/api/exam/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subtestAttemptId: current.subtestAttemptId }),
+        body: JSON.stringify({
+          subtestAttemptId: currentSubtest.subtestAttemptId,
+        }),
       })
 
       const nextIndex = currentSubtestIndex + 1
+
       if (nextIndex < data.length) {
-        // Ada subtest berikutnya → pindah
         goToSubtest(nextIndex)
         setIsSubmitting(false)
       } else {
-        // Semua subtest selesai → ke halaman hasil
         router.push(`/exam/result/${testAttemptId}`)
       }
     } catch {
       setIsSubmitting(false)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSubtestIndex, data.length, isSubmitting])
+  }, [isSubmitting, currentSubtest, currentSubtestIndex, data.length, goToSubtest, router, testAttemptId])
 
-  // Daftarkan callback onTimeUp ke store
+  // ================= TIMER CALLBACK =================
   useEffect(() => {
     setOnTimeUp(submitCurrentSubtest)
   }, [submitCurrentSubtest, setOnTimeUp])
 
   useTimer()
 
-  const currentSubtest = getCurrentSubtest()
-  const subtestAttemptId = currentSubtest?.subtestAttemptId ?? ''
-  const questions = currentSubtest?.questions ?? []
-  const currentQuestion = questions[currentIndex]
-
+  // ================= AUTOSAVE =================
   useAutoSave(subtestAttemptId)
 
   if (!currentSubtest) {
@@ -113,7 +113,8 @@ export default function ExamClient({ data, testAttemptId }: Props) {
 
   return (
     <div className="flex gap-6 p-6 min-h-screen bg-gray-50">
-      {/* Sidebar subtest */}
+      
+      {/* Sidebar */}
       <aside className="w-40 shrink-0">
         <div className="font-semibold text-sm mb-2 text-gray-500">Subtest</div>
         {data.map((sa, i) => (
@@ -130,15 +131,13 @@ export default function ExamClient({ data, testAttemptId }: Props) {
         ))}
       </aside>
 
-      {/* Area soal */}
+      {/* Main */}
       <main className="flex-1 max-w-2xl">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h1 className="font-bold text-lg">{currentSubtest.title}</h1>
           <Timer />
         </div>
 
-        {/* Soal */}
         {currentQuestion ? (
           <QuestionCard
             question={currentQuestion}
@@ -148,7 +147,6 @@ export default function ExamClient({ data, testAttemptId }: Props) {
           <p>Soal tidak ditemukan.</p>
         )}
 
-        {/* Navigasi Prev/Next */}
         <div className="flex justify-between mt-6">
           <button
             onClick={() => setCurrentQuestion(Math.max(0, currentIndex - 1))}
@@ -181,7 +179,7 @@ export default function ExamClient({ data, testAttemptId }: Props) {
         </div>
       </main>
 
-      {/* Panel nomor soal */}
+      {/* Navigation */}
       <NavigationPanel
         questions={questions}
         subtestAttemptId={subtestAttemptId}

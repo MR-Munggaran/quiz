@@ -5,6 +5,8 @@ import { useExamStore } from '@/store/exam-store'
 type Option = { id: string; content: string }
 type Question = { id: string; content: string; question_options: Option[] }
 
+const EMPTY: Record<string, string> = {}
+
 export default function QuestionCard({
   question,
   subtestAttemptId,
@@ -13,8 +15,13 @@ export default function QuestionCard({
   subtestAttemptId: string
 }) {
   const setAnswer = useExamStore((s) => s.setAnswer)
-  const getAnswers = useExamStore((s) => s.getAnswersForSubtest)
-  const selectedOptionId = getAnswers(subtestAttemptId)[question.id]
+
+  // ✅ direct state access (NO FUNCTION)
+  const answers = useExamStore(
+    (s) => s.answers[subtestAttemptId] ?? EMPTY
+  )
+
+  const selectedOptionId = answers[question.id]
 
   return (
     <div className="bg-white rounded-xl border p-6 shadow-sm">
@@ -23,6 +30,7 @@ export default function QuestionCard({
       <div className="mt-4 space-y-2">
         {question.question_options.map((opt) => {
           const isSelected = selectedOptionId === opt.id
+
           return (
             <button
               key={opt.id}

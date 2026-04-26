@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 export async function POST(req: Request) {
   try {
     const { attemptId, answers } = await req.json()
-    // answers: Record<questionId, optionId>
 
     if (!attemptId || !answers) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
@@ -28,7 +27,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Upsert setiap jawaban ke tabel user_answers
+    // Upsert setiap jawaban ke tabel user_responses (BUKAN user_answers)
     const upsertPayload = Object.entries(answers).map(([questionId, optionId]) => ({
       subtest_attempt_id: attemptId,
       question_id: questionId,
@@ -40,15 +39,16 @@ export async function POST(req: Request) {
     }
 
     const { error } = await supabase
-      .from('user_answers')
+      .from('user_responses')
       .upsert(upsertPayload, {
-        onConflict: 'subtest_attempt_id,question_id',
+        onConflict: 'subtest_attempt_id, question_id'
       })
 
     if (error) throw error
 
     return NextResponse.json({ saved: upsertPayload.length })
   } catch (err: any) {
+    console.error(err)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

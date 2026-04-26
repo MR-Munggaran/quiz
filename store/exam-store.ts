@@ -29,14 +29,12 @@ type ExamState = {
   currentSubtestIndex: number
   setSubtests: (subtests: SubtestInfo[]) => void
   goToSubtest: (index: number) => void
-  getCurrentSubtest: () => SubtestInfo | null
 
   // Jawaban (per subtestAttemptId)
-  answers: Record<string, AnswerMap> // subtestAttemptId → AnswerMap
+  answers: Record<string, AnswerMap>
   setAnswer: (subtestAttemptId: string, questionId: string, optionId: string) => void
-  getAnswersForSubtest: (subtestAttemptId: string) => AnswerMap
 
-  // Callback auto-submit (diisi dari ExamClient)
+  // Callback auto-submit
   onTimeUp: (() => void) | null
   setOnTimeUp: (fn: () => void) => void
 
@@ -44,43 +42,58 @@ type ExamState = {
 }
 
 export const useExamStore = create<ExamState>((set, get) => ({
+  // ================= TIMER =================
   timeLeft: 0,
+
   setTime: (time) => set({ timeLeft: time }),
+
   tick: () =>
     set((state) => {
       const newTime = state.timeLeft > 0 ? state.timeLeft - 1 : 0
+
       if (newTime === 0 && state.timeLeft > 0) {
-        // Timer habis → panggil callback
-        setTimeout(() => state.onTimeUp?.(), 0)
+        // Gunakan setTimeout untuk menghindari update state saat rendering
+        setTimeout(() => {
+          const currentOnTimeUp = get().onTimeUp
+          if (currentOnTimeUp) currentOnTimeUp()
+        }, 0)
       }
+
       return { timeLeft: newTime }
     }),
 
+  // ================= NAVIGATION =================
   currentQuestionIndex: 0,
-  setCurrentQuestion: (index) => set({ currentQuestionIndex: index }),
 
+  setCurrentQuestion: (index) =>
+    set({ currentQuestionIndex: index }),
+
+  // ================= SUBTEST =================
   subtests: [],
   currentSubtestIndex: 0,
 
-  setSubtests: (subtests) => set({ subtests, currentSubtestIndex: 0 }),
+  setSubtests: (subtests) =>
+    set({
+      subtests,
+      currentSubtestIndex: 0,
+      currentQuestionIndex: 0, // Reset index soal saat set subtests baru
+    }),
 
   goToSubtest: (index) =>
     set((state) => {
       const subtest = state.subtests[index]
       if (!subtest) return {}
+
       return {
         currentSubtestIndex: index,
-        currentQuestionIndex: 0,
+        currentQuestionIndex: 0, // Reset ke soal pertama di subtest baru
         timeLeft: subtest.durationSeconds,
       }
     }),
 
-  getCurrentSubtest: () => {
-    const { subtests, currentSubtestIndex } = get()
-    return subtests[currentSubtestIndex] ?? null
-  },
-
+  // ================= ANSWERS =================
   answers: {},
+
   setAnswer: (subtestAttemptId, questionId, optionId) =>
     set((state) => ({
       answers: {
@@ -91,11 +104,13 @@ export const useExamStore = create<ExamState>((set, get) => ({
         },
       },
     })),
-  getAnswersForSubtest: (subtestAttemptId) => get().answers[subtestAttemptId] ?? {},
 
+  // ================= CALLBACK =================
   onTimeUp: null,
+
   setOnTimeUp: (fn) => set({ onTimeUp: fn }),
 
+  // ================= RESET =================
   reset: () =>
     set({
       timeLeft: 0,

@@ -2,25 +2,26 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ExamClient from './ExamClient'
 
-export default async function Page({ params }: { params: { attemptId: string } }) {
+export default async function Page({ params }: { params: Promise<{ attemptId: string }> }) {
+  const { attemptId } = await params
+
   const supabase = await createClient()
 
   // Pastikan user sudah login
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Cek apakah ujian sudah selesai (redirect ke hasil)
+  // Cek apakah ujian sudah selesai
   const { data: testAttempt } = await supabase
     .from('test_attempts')
     .select('id, status')
-    .eq('id', params.attemptId)
+    .eq('id', attemptId)
     .single()
 
   if (testAttempt?.status === 'completed') {
-    redirect(`/exam/result/${params.attemptId}`)
+    redirect(`/exam/result/${attemptId}`)
   }
 
-  // Ambil semua subtest_attempts beserta soal-soalnya, urut by order_index
   const { data, error } = await supabase
     .from('subtest_attempts')
     .select(`
@@ -42,14 +43,13 @@ export default async function Page({ params }: { params: { attemptId: string } }
         )
       )
     `)
-    .eq('test_attempt_id', params.attemptId)
+    .eq('test_attempt_id', attemptId)
     .order('subtest(order_index)')
 
   if (error || !data) {
     return <div className="p-6">Gagal memuat data ujian.</div>
   }
 
-  // Sort questions per subtest
   const sorted = data.map((sa: any) => ({
     ...sa,
     subtest: {
@@ -60,5 +60,5 @@ export default async function Page({ params }: { params: { attemptId: string } }
     },
   }))
 
-  return <ExamClient data={sorted} testAttemptId={params.attemptId} />
+  return <ExamClient data={sorted} testAttemptId={attemptId} />
 }

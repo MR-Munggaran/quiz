@@ -4,6 +4,8 @@ import { useExamStore } from '@/store/exam-store'
 
 type Question = { id: string }
 
+const EMPTY: Record<string, string> = {}
+
 export default function NavigationPanel({
   questions,
   subtestAttemptId,
@@ -13,16 +15,23 @@ export default function NavigationPanel({
 }) {
   const setCurrent = useExamStore((s) => s.setCurrentQuestion)
   const currentIndex = useExamStore((s) => s.currentQuestionIndex)
-  const getAnswers = useExamStore((s) => s.getAnswersForSubtest)
-  const answers = getAnswers(subtestAttemptId)
+
+  // ✅ direct state access
+  const answers = useExamStore(
+    (s) => s.answers[subtestAttemptId] ?? EMPTY
+  )
 
   return (
     <aside className="w-44 shrink-0">
-      <div className="font-semibold text-sm mb-2 text-gray-500">Nomor Soal</div>
+      <div className="font-semibold text-sm mb-2 text-gray-500">
+        Nomor Soal
+      </div>
+
       <div className="grid grid-cols-5 gap-1">
         {questions.map((q, i) => {
           const answered = !!answers[q.id]
           const isCurrent = i === currentIndex
+
           return (
             <button
               key={q.id}

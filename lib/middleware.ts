@@ -11,31 +11,44 @@ export async function middleware(req: NextRequest) {
     {
       cookies: {
         get: (name) => req.cookies.get(name)?.value,
-        set: (name, value, options) => {
-          res.cookies.set(name, value, options)
-        },
-        remove: (name, options) => {
-          res.cookies.set(name, '', options)
-        },
+        set: (name, value, options) => { res.cookies.set(name, value, options) },
+        remove: (name, options) => { res.cookies.delete(name) }
       },
     }
   )
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
 
-  const isAuthPage = req.nextUrl.pathname.startsWith('/login')
-  const isProtected = req.nextUrl.pathname.startsWith('/dashboard') ||
-                      req.nextUrl.pathname.startsWith('/exam')
+  const isAuthPage   = req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/register')
+  const isAdminPage  = req.nextUrl.pathname.startsWith('/admin')
+  const isProtected  = req.nextUrl.pathname.startsWith('/dashboard') || req.nextUrl.pathname.startsWith('/exam')
 
-  if (!session && isProtected) {
+  // Redirect ke login jika belum login dan akses halaman protected
+  if (!session && (isProtected || isAdminPage)) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
+  // Redirect ke dashboard jika sudah login dan akses halaman auth
   if (session && isAuthPage) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
+  // Cek role admin untuk halaman /admin
+  if (session && isAdminPage) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+  }
+
   return res
+}
+
+export const config = {
+  matcher: ['/dashboard/:path*', '/exam/:path*', '/admin/:path*', '/login', '/register'],
 }
