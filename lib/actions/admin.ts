@@ -43,19 +43,31 @@ export async function createTest(formData: FormData) {
 export async function updateTest(formData: FormData) {
   const supabase = await requireAdmin()
 
-  const id                      = formData.get('id') as string
-  const title                   = formData.get('title') as string
-  const description             = formData.get('description') as string
+  const id = formData.get('id') as string
+  const title = formData.get('title') as string
+  const description = formData.get('description') as string
+
+  // 🛑 GUARD: Prevent null/empty title from hitting the DB
+  if (!title || title.trim() === "") {
+    throw new Error("Judul ujian tidak boleh kosong.")
+  }
+
   const global_duration_minutes = formData.get('global_duration_minutes')
     ? Number(formData.get('global_duration_minutes'))
     : null
 
   const { error } = await supabase
     .from('tests')
-    .update({ title, description, global_duration_minutes, updated_at: new Date().toISOString() })
+    .update({ 
+      title: title.trim(), 
+      description, 
+      global_duration_minutes, 
+      updated_at: new Date().toISOString() 
+    })
     .eq('id', id)
 
   if (error) throw new Error(error.message)
+  
   revalidatePath('/admin')
   revalidatePath('/admin/tests/' + id)
 }
@@ -81,7 +93,7 @@ export async function createSubtest(formData: FormData) {
   const supabase = await requireAdmin()
 
   const test_id          = formData.get('test_id') as string
-  const title            = formData.get('name') as string // Input form menggunakan 'name', tapi kolom DB adalah 'title'
+  const title            = formData.get('title') as string // Input form menggunakan 'name', tapi kolom DB adalah 'title'
   const duration_minutes = Number(formData.get('duration_minutes') || 30)
   const order_index      = Number(formData.get('order_index') || 0)
 
@@ -134,11 +146,12 @@ export async function createQuestion(formData: FormData) {
   const subtest_id  = formData.get('subtest_id') as string
   const test_id     = formData.get('test_id') as string
   const content     = formData.get('content') as string
+  const explanation = (formData.get('explanation') as string) || null
   const order_index = Number(formData.get('order_index') || 0)
 
   const { data: question, error } = await supabase
     .from('questions')
-    .insert({ subtest_id, content, order_index })
+    .insert({ subtest_id, content, explanation, order_index })
     .select()
     .single()
 
@@ -176,11 +189,12 @@ export async function updateQuestion(formData: FormData) {
   const subtest_id  = formData.get('subtest_id') as string
   const test_id     = formData.get('test_id') as string
   const content     = formData.get('content') as string
+  const explanation = (formData.get('explanation') as string) || null
   const order_index = Number(formData.get('order_index') || 0)
 
   const { error } = await supabase
     .from('questions')
-    .update({ content, order_index })
+    .update({ content, explanation, order_index })
     .eq('id', id)
 
   if (error) throw new Error(error.message)
@@ -275,12 +289,22 @@ export async function importQuestionsFromCSV(formData: FormData) {
     const cols = parseCSVLine(line)
 
     // Format: order_index, content, option_A, option_B, option_C, option_D, option_E, correct_option
-    if (cols.length < 7) {
+    if (cols.length < 8) {
       errors.push(`Baris ${i + 2}: kolom tidak cukup (${cols.length} dari minimal 7)`)
       continue
     }
 
-    const [order_str, content, opt_A, opt_B, opt_C, opt_D, opt_E, correct_option] = cols
+    const [
+      order_str,
+      content,
+      explanation,
+      opt_A,
+      opt_B,
+      opt_C,
+      opt_D,
+      opt_E,
+      correct_option
+    ] = cols
     const order_index = parseInt(order_str) || (i + 1)
 
     if (!content.trim()) {
@@ -296,7 +320,12 @@ export async function importQuestionsFromCSV(formData: FormData) {
 
     const { data: question, error: qErr } = await supabase
       .from('questions')
-      .insert({ subtest_id, content: content.trim(), order_index })
+      .insert({
+        subtest_id,
+        content: content.trim(),
+        explanation: explanation?.trim() || null,
+        order_index
+      })
       .select()
       .single()
 

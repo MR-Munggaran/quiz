@@ -15,7 +15,6 @@ export default async function Dashboard() {
     .eq('id', user.id)
     .single()
 
-  // Jika admin, redirect ke panel admin
   if (profile?.role === 'admin') redirect('/admin')
 
   const { data: tests } = await supabase
@@ -24,14 +23,20 @@ export default async function Dashboard() {
     .eq('is_active', true)
     .order('created_at', { ascending: false })
 
-  // Ambil riwayat attempt user
+  // ✅ Tambahkan id ke select agar bisa link ke result
   const { data: attempts } = await supabase
     .from('test_attempts')
-    .select('test_id, status, started_at, completed_at')
+    .select('id, test_id, status, started_at, completed_at')
     .eq('user_id', user.id)
     .order('started_at', { ascending: false })
 
-  const attemptMap = new Map(attempts?.map(a => [a.test_id, a]) ?? [])
+  // ✅ Simpan attempt terbaru per test_id (sudah diurutkan descending)
+  const attemptMap = new Map<string, NonNullable<typeof attempts>[number]>()
+  for (const attempt of attempts ?? []) {
+    if (!attemptMap.has(attempt.test_id)) {
+      attemptMap.set(attempt.test_id, attempt)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -68,8 +73,31 @@ export default async function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {tests.map((test) => {
               const attempt = attemptMap.get(test.id)
+
+              // ✅ Routing yang benar berdasarkan status
+              const href = !attempt
+                ? `/exam/${test.id}`                        // Belum pernah → halaman persiapan
+                : attempt.status === 'ongoing'
+                ? `/exam/attempt/${attempt.id}`             // Ongoing → langsung ke ujian
+                : `/exam/result/${attempt.id}`              // Completed → langsung ke hasil
+
+              const buttonLabel = !attempt
+                ? '🚀 Mulai Ujian'
+                : attempt.status === 'ongoing'
+                ? '▶ Lanjutkan Ujian'
+                : '📊 Lihat Hasil'
+
+              const buttonClass = !attempt
+                ? 'bg-gray-900 hover:bg-gray-700 text-white'
+                : attempt.status === 'ongoing'
+                ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+
               return (
-                <div key={test.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-md transition-shadow">
+                <div
+                  key={test.id}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-md transition-shadow"
+                >
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <h3 className="text-lg font-bold text-gray-900">{test.title}</h3>
@@ -87,19 +115,29 @@ export default async function Dashboard() {
                       {test.description || 'Tidak ada deskripsi untuk ujian ini.'}
                     </p>
                     <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
-                      {test.global_duration_minutes ? `⏱ ${test.global_duration_minutes} menit` : '⏱ Waktu per sub-tes'}
+                      {test.global_duration_minutes
+                        ? `⏱ ${test.global_duration_minutes} menit`
+                        : '⏱ Waktu per sub-tes'}
                     </div>
                   </div>
 
                   <div className="mt-5 space-y-2">
                     <Link
-                      href={`/exam/${test.id}`}
-                      className="block w-full text-center bg-gray-900 hover:bg-gray-700 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
+                      href={href}
+                      className={`block w-full text-center font-medium py-2.5 rounded-lg transition-colors text-sm ${buttonClass}`}
                     >
-                      {attempt
-                        ? attempt.status === 'completed' ? '📊 Lihat Hasil' : '▶ Lanjutkan Ujian'
-                        : '🚀 Mulai Ujian'}
+                      {buttonLabel}
                     </Link>
+
+                    {/* ✅ Tombol "Ulangi Ujian" jika sudah completed */}
+                    {attempt?.status === 'completed' && (
+                      <Link
+                        href={`/exam/${test.id}`}
+                        className="block w-full text-center font-medium py-2.5 rounded-lg transition-colors text-sm bg-white hover:bg-gray-50 text-gray-600 border border-gray-200"
+                      >
+                        🔁 Ulangi Ujian
+                      </Link>
+                    )}
                   </div>
                 </div>
               )

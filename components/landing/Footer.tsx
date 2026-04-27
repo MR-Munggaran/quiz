@@ -1,9 +1,8 @@
-import { Mail, Phone, MapPin, BookIcon , TimerIcon, LinkIcon } from "lucide-react";
+import { Mail, Phone, MapPin, GitBranchIcon, TableRowsSplit, MessageCircle } from "lucide-react";
 
 /**
- * Footer Component - Modern Minimalist Design
- * Features: Multi-column layout, social links, contact info
- * Typography: Poppins Bold for headings, Inter Regular for body
+ * Footer Component - Open Source Community Theme
+ * Emerald/teal accents, community links, open source references
  */
 
 export default function Footer() {
@@ -15,112 +14,77 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-400 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-400 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">Q</span>
               </div>
-              <span className="text-xl font-bold text-white">Quiz</span>
+              <span className="text-xl font-bold text-white">QuizOpen</span>
+            </div>
+            <div className="inline-flex items-center px-2 py-1 rounded-md bg-emerald-900/50 border border-emerald-700/50 text-emerald-400 text-xs font-semibold">
+              MIT License — Free Forever
             </div>
             <p className="text-gray-400 leading-relaxed">
-              Platform kuis online terpercaya untuk guru dan siswa di seluruh
-              Indonesia.
+              Platform kuis open source untuk guru dan siswa di seluruh Indonesia. Gratis selamanya.
             </p>
             <div className="flex gap-4 pt-4">
               <a
-                href="#"
-                className="w-10 h-10 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors"
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-colors"
+                title="GitHub"
               >
-                <BookIcon className="w-5 h-5" />
+                <GitBranchIcon className="w-5 h-5" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors"
+                className="w-10 h-10 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-colors"
+                title="Twitter"
               >
-                <TimerIcon className="w-5 h-5" />
+                <TableRowsSplit className="w-5 h-5" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors"
+                className="w-10 h-10 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-colors"
+                title="Discord"
               >
-                <LinkIcon className="w-5 h-5" />
+                <MessageCircle className="w-5 h-5" />
               </a>
             </div>
           </div>
 
           {/* Product Column */}
           <div className="space-y-4">
-            <h3 className="text-white font-bold text-lg">Produk</h3>
+            <h3 className="text-white font-bold text-lg">Platform</h3>
             <ul className="space-y-2">
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Fitur
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Harga
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Keamanan
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Roadmap
-                </a>
-              </li>
+              {["Fitur", "Dokumentasi", "Changelog", "Roadmap"].map((item) => (
+                <li key={item}>
+                  <a href="#" className="text-gray-400 hover:text-emerald-400 transition-colors">
+                    {item}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Company Column */}
+          {/* Community Column */}
           <div className="space-y-4">
-            <h3 className="text-white font-bold text-lg">Perusahaan</h3>
+            <h3 className="text-white font-bold text-lg">Komunitas</h3>
             <ul className="space-y-2">
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Tentang Kami
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Karir
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Kontak
-                </a>
-              </li>
+              {[
+                { label: "GitHub", href: "https://github.com" },
+                { label: "Diskusi", href: "#" },
+                { label: "Kontribusi", href: "#" },
+                { label: "Blog", href: "#" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    className="text-gray-400 hover:text-emerald-400 transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -129,28 +93,20 @@ export default function Footer() {
             <h3 className="text-white font-bold text-lg">Hubungi Kami</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <a
-                  href="mailto:support@quiz.com"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  support@quiz.com
+                <Mail className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <a href="mailto:hello@quizopen.id" className="text-gray-400 hover:text-white transition-colors">
+                  hello@quizopen.id
                 </a>
               </li>
               <li className="flex items-start gap-3">
-                <Phone className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <a
-                  href="tel:+62123456789"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
+                <Phone className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <a href="tel:+62123456789" className="text-gray-400 hover:text-white transition-colors">
                   +62 (123) 456-789
                 </a>
               </li>
               <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-400">
-                  Jakarta, Indonesia
-                </span>
+                <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <span className="text-gray-400">Jakarta, Indonesia</span>
               </li>
             </ul>
           </div>
@@ -162,27 +118,15 @@ export default function Footer() {
         {/* Bottom Footer */}
         <div className="py-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-400 text-sm">
-            © 2026 Quiz Platform. Semua hak dilindungi.
+            © 2026 QuizOpen. Dibuat dengan ❤️ oleh komunitas. Dirilis di bawah{" "}
+            <a href="#" className="text-emerald-400 hover:underline">MIT License</a>.
           </p>
           <div className="flex gap-6 text-sm">
-            <a
-              href="#"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              Kebijakan Privasi
-            </a>
-            <a
-              href="#"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              Syarat Layanan
-            </a>
-            <a
-              href="#"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              Kebijakan Cookie
-            </a>
+            {["Kebijakan Privasi", "Syarat Layanan", "Kebijakan Cookie"].map((item) => (
+              <a key={item} href="#" className="text-gray-400 hover:text-white transition-colors">
+                {item}
+              </a>
+            ))}
           </div>
         </div>
       </div>

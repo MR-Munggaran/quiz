@@ -1,11 +1,3 @@
-order_index,content,option_A,option_B,option_C,option_D,option_E,correct_option
-1,"Berapakah hasil dari 15 x 8?","100","110","120","130","140","C"
-2,"Ibu kota negara Indonesia adalah...","Surabaya","Bandung","Jakarta","Medan","Yogyakarta","C"
-3,"Siapakah presiden pertama Republik Indonesia?","Mohammad Hatta","Soekarno","Soeharto","Habibie","Megawati","B"
-4,"Manakah yang merupakan bilangan prima?","9","15","21","23","25","D"
-5,"Rumus luas lingkaran adalah...","2πr","πr²","πd","2πd","4πr²","B"
-6,"Gas apa yang paling banyak terdapat di atmosfer bumi?","Oksigen","Karbon Dioksida","Nitrogen","Hidrogen","Helium","C"
-7,"Berapakah akar kuadrat dari 144?","10","11","12","13","14","C"
-8,"Tahun berapa Indonesia merdeka?","1942","1944","1945","1946","1950","C"
-9,"Planet manakah yang paling dekat dengan matahari?","Venus","Mars","Bumi","Merkurius","Jupiter","D"
-10,"Manakah yang termasuk kalimat aktif?","Buku itu dibaca oleh Budi","Budi sedang membaca buku","Buku dibacakan Budi","Dibaca Budi buku itu","Buku Budi baca","B"
+order_index,content,explanation,option_A,option_B,option_C,option_D,option_E,correct_option
+1,2 + 2 = ?,Penjumlahan dasar matematika,1,2,3,4,5,D
+2,Ibu kota Indonesia?,Jakarta adalah ibu kota Indonesia,Bandung,Surabaya,Jakarta,Medan,Bali,C

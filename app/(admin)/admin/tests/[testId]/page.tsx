@@ -29,6 +29,9 @@ export default async function AdminTestDetail({
     .eq('test_id', testId)
     .order('order_index')
 
+  
+  console.log(subtests)
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
@@ -51,9 +54,40 @@ export default async function AdminTestDetail({
           <form action={updateTest} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input type="hidden" name="id" value={test.id} />
 
-            {/* semua input */}
+            {/* Title Input */}
+            <div className="col-span-2 md:col-span-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1">Judul Ujian</label>
+              <input
+                name="title"
+                defaultValue={test.title}
+                required
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
 
-            <div className="flex items-end gap-3 flex-wrap">
+            {/* Duration Input */}
+            <div className="col-span-2 md:col-span-1">
+              <label className="block text-xs font-medium text-gray-600 mb-1">Durasi Global (Opsional)</label>
+              <input
+                name="global_duration_minutes"
+                type="number"
+                defaultValue={test.global_duration_minutes ?? ''}
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            {/* Description Input */}
+            <div className="col-span-2">
+              <label className="block text-xs font-medium text-gray-600 mb-1">Deskripsi</label>
+              <textarea
+                name="description"
+                defaultValue={test.description}
+                rows={3}
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="flex items-end gap-3 flex-wrap col-span-2">
               <button
                 type="submit"
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors"
@@ -61,23 +95,6 @@ export default async function AdminTestDetail({
                 Simpan Perubahan
               </button>
             </div>
-          </form>
-
-          {/* ⬇️ pindahin ke luar */}
-          <form
-            action={toggleTestStatus.bind(null, test.id, test.is_active)}
-            className="inline"
-          >
-            <button
-              type="submit"
-              className={`font-medium px-5 py-2.5 rounded-lg text-sm border transition-colors ${
-                test.is_active
-                  ? 'text-yellow-700 border-yellow-300 hover:bg-yellow-50'
-                  : 'text-green-700 border-green-300 hover:bg-green-50'
-              }`}
-            >
-              {test.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-            </button>
           </form>
         </section>
 
@@ -132,14 +149,14 @@ export default async function AdminTestDetail({
 
           {/* Daftar Subtest */}
           <div className="space-y-2">
-            {subtests?.map((st, idx) => (
+            {subtests?.map((st, idx) =>  (
               <div key={st.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:bg-gray-50">
                 <div className="flex items-center gap-3">
                   <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-100 text-blue-700 font-bold text-xs">
                     {idx + 1}
                   </span>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">{st.name}</p>
+                    <p className="font-semibold text-gray-900 text-sm">{st.title}</p>
                     <p className="text-gray-400 text-xs mt-0.5">
                       ⏱ {st.duration_minutes} menit &nbsp;·&nbsp;
                       📝 {(st.questions as any)?.[0]?.count ?? 0} soal
@@ -177,7 +194,7 @@ export default async function AdminTestDetail({
               <form key={st.id} action={updateSubtestDuration} className="flex items-center gap-4">
                 <input type="hidden" name="id"      value={st.id}     />
                 <input type="hidden" name="test_id" value={testId}    />
-                <span className="text-sm font-medium text-gray-800 w-40 truncate">{st.name}</span>
+                <span className="text-sm font-medium text-gray-800 w-40 truncate">{st.title}</span>
                 <input
                   name="duration_minutes"
                   type="number"

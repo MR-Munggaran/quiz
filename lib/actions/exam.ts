@@ -5,15 +5,14 @@ import { createClient } from '@/lib/supabase/server'
 export async function startExam(testId: string) {
   const supabase = await createClient()
 
-  // 1. Ambil user
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) throw new Error('Unauthorized')
 
-  // 2. Cek apakah sudah ada attempt aktif
-  const { data: existing } = await supabase
+  // Cek attempt aktif (ongoing) — lanjutkan jika ada
+  const { data: ongoingAttempt } = await supabase
     .from('test_attempts')
     .select('*')
     .eq('user_id', user.id)
@@ -21,11 +20,11 @@ export async function startExam(testId: string) {
     .eq('status', 'ongoing')
     .maybeSingle()
 
-  if (existing) {
-    return { attemptId: existing.id }
+  if (ongoingAttempt) {
+    return { attemptId: ongoingAttempt.id, isNew: false }
   }
 
-  // 3. Buat test_attempt
+  // Buat test_attempt baru
   const { data: attempt, error: attemptError } = await supabase
     .from('test_attempts')
     .insert({
@@ -38,7 +37,7 @@ export async function startExam(testId: string) {
 
   if (attemptError) throw attemptError
 
-  // 4. Ambil semua subtest
+  // Ambil semua subtest
   const { data: subtests, error: subtestError } = await supabase
     .from('subtests')
     .select('*')
@@ -47,9 +46,7 @@ export async function startExam(testId: string) {
 
   if (subtestError) throw subtestError
 
-  // 5. Generate subtest_attempts
   const now = new Date()
-
   const subtestAttempts = subtests.map((s) => ({
     test_attempt_id: attempt.id,
     subtest_id: s.id,
@@ -64,5 +61,31 @@ export async function startExam(testId: string) {
 
   if (insertError) throw insertError
 
-  return { attemptId: attempt.id }
+  return { attemptId: attempt.id, isNew: true }
+}
+
+/**
+ * Cek riwayat ujian user untuk test tertentu.
+ * Mengembalikan attempt ongoing (jika ada) dan daftar attempt completed.
+ */
+export async function getExamHistory(testId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: attempts } = await supabase
+    .from('test_attempts')
+    .select('id, status, created_at, completed_at')
+    .eq('user_id', user.id)
+    .eq('test_id', testId)
+    .order('created_at', { ascending: false })
+
+  const ongoing = attempts?.find((a) => a.status === 'ongoing') ?? null
+  const completed = attempts?.filter((a) => a.status === 'completed') ?? []
+
+  return { ongoing, completed }
 }

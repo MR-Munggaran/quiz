@@ -4,8 +4,8 @@ import { useState, useTransition } from 'react'
 import { createQuestion, updateQuestion, deleteQuestion, importQuestionsFromCSV } from '@/lib/actions/admin'
 
 type Option = { id: string; content: string; is_correct: boolean; order_index: number }
-type Question = { id: string; content: string; order_index: number; question_options: Option[] }
-type Subtest = { id: string; name: string; duration_minutes: number; test_id: string }
+type Question = { id: string; content: string; explanation: string | null; order_index: number; question_options: Option[] }
+type Subtest = { id: string; title: string; duration_minutes: number; test_id: string }
 
 interface Props {
   subtest: Subtest
@@ -61,7 +61,7 @@ export default function SubtestQuestionsClient({ subtest, questions: initialQues
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-gray-900">
-            📝 Soal: {subtest.name}
+            📝 Soal: {subtest.title}
           </h2>
           <p className="text-sm text-gray-500">⏱ {subtest.duration_minutes} menit · {questions.length} soal</p>
         </div>
@@ -105,6 +105,11 @@ export default function SubtestQuestionsClient({ subtest, questions: initialQues
               className="border border-gray-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
               {['A', 'B', 'C', 'D', 'E'].map(l => <option key={l} value={l}>Opsi {l}</option>)}
             </select>
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-700 mb-1">Pembahasan (opsional)</label>
+            <textarea name="explanation" placeholder="Tulis pembahasan jawaban..." rows={2}
+              className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
           </div>
           <div className="flex gap-3">
             <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg text-sm">
@@ -196,6 +201,11 @@ export default function SubtestQuestionsClient({ subtest, questions: initialQues
                     {['A', 'B', 'C', 'D', 'E'].map(l => <option key={l} value={l}>Opsi {l}</option>)}
                   </select>
                 </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Pembahasan (opsional)</label>
+                  <textarea name="explanation" defaultValue={q.explanation ?? ''} rows={2}
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+                </div>
                 <div className="flex gap-2">
                   <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg text-sm">Simpan</button>
                   <button type="button" onClick={() => setEditingId(null)} className="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Batal</button>
@@ -221,6 +231,12 @@ export default function SubtestQuestionsClient({ subtest, questions: initialQues
                           </div>
                         ))}
                     </div>
+                    {q.explanation && (
+                      <div className="mt-3 text-sm text-gray-700 bg-amber-50 rounded-lg p-3 border border-amber-200">
+                        <span className="font-semibold text-amber-800 block mb-1 text-xs">💡 Pembahasan:</span>
+                        <span className="text-xs text-amber-900">{q.explanation}</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button onClick={() => setEditingId(q.id)}
