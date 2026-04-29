@@ -36,12 +36,12 @@ export default function Header() {
             <a href="#how-it-works" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
               Cara Kerja
             </a>
-            <Link href="/community" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
+            {/* <Link href="/community" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
               Komunitas
             </Link>
             <Link href="/faq" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
               FAQ
-            </Link>
+            </Link> */}
           </nav>
 
           {/* Desktop CTA Buttons */}
@@ -91,19 +91,26 @@ export default function Header() {
             <a href="#how-it-works" className="block px-4 py-2 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg transition-colors">
               Cara Kerja
             </a>
-            <a href="#community" className="block px-4 py-2 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg transition-colors">
+            {/* <a href="#community" className="block px-4 py-2 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg transition-colors">
               Komunitas
             </a>
             <a href="#faq" className="block px-4 py-2 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg transition-colors">
               FAQ
-            </a>
+            </a> */}
             <div className="pt-3 space-y-2 border-t border-gray-200">
-              <Button variant="ghost" className="w-full text-gray-900 hover:bg-gray-100 font-medium">
+              <Link
+                href="/login"
+                className="block w-full text-gray-900 hover:bg-gray-100 font-medium px-4 py-2 rounded-md"
+              >
                 Masuk
-              </Button>
-              <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium">
+              </Link>
+
+              <Link
+                href="/register"
+                className="block w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-md text-center"
+              >
                 Mulai Gratis
-              </Button>
+              </Link>
             </div>
           </div>
         )}

@@ -25,21 +25,15 @@ import {
  */
 
 const contributors = [
-  { name: "Arif Hidayat", role: "Core Maintainer", commits: 342, avatar: "AH", color: "bg-emerald-500" },
-  { name: "Siti Rahayu", role: "Frontend Dev", commits: 218, avatar: "SR", color: "bg-teal-500" },
-  { name: "Budi Santoso", role: "Backend Dev", commits: 195, avatar: "BS", color: "bg-cyan-500" },
-  { name: "Dewi Lestari", role: "UI/UX Designer", commits: 134, avatar: "DL", color: "bg-emerald-400" },
-  { name: "Rizky Pratama", role: "DevOps", commits: 98, avatar: "RP", color: "bg-teal-400" },
-  { name: "Nurul Fikri", role: "Contributor", commits: 76, avatar: "NF", color: "bg-green-500" },
-  { name: "Hendra Wijaya", role: "Contributor", commits: 64, avatar: "HW", color: "bg-cyan-400" },
-  { name: "Anda?", role: "Contributor Baru", commits: 0, avatar: "?", color: "bg-gray-400" },
+  { name: "Rafi Munggaran", role: "Creator & Maintainer", commits: 3, avatar: "RM", color: "bg-emerald-500" },
+  { name: "Anda?", role: "Jadilah Kontributor Pertama", commits: 0, avatar: "?", color: "bg-gray-400" },
 ];
 
 const stats = [
-  { icon: Star, label: "GitHub Stars", value: "2.4k", color: "text-yellow-500" },
-  { icon: GitFork, label: "Forks", value: "430", color: "text-emerald-500" },
-  { icon: Users, label: "Kontributor", value: "87", color: "text-teal-500" },
-  { icon: Globe, label: "Pengguna Aktif", value: "10K+", color: "text-cyan-500" },
+  { icon: Star, label: "GitHub Stars", value: "0", color: "text-yellow-500" },
+  { icon: GitFork, label: "Forks", value: "0", color: "text-emerald-500" },
+  { icon: Users, label: "Kontributor", value: "2", color: "text-teal-500" },
+  { icon: Globe, label: "Pengguna Aktif", value: "5", color: "text-cyan-500" },
 ];
 
 const channels = [
